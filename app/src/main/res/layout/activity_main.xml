@@ -19,7 +19,7 @@
         android:layout_weight="1"
         android:gravity="center"
         android:textStyle="bold"
-        android:text="PLACEHOLDER"
+        android:text="@string/txt_message"
         android:textColor="@android:color/black"
         android:textSize="20sp" />
 </LinearLayout>
