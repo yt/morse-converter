@@ -11,17 +11,17 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="4" />
-    <TextView
+    <EditText
         android:id="@+id/text_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="8dp"
         android:layout_weight="1"
         android:gravity="center"
-        android:textStyle="bold"
         android:text="@string/txt_message"
         android:textColor="@android:color/black"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
     <Button
         android:id="@+id/camera_button"
@@ -29,9 +29,4 @@
         android:layout_height="wrap_content"
         android:text="Camera"
         android:onClick="cameraSwitchButton"/>
-    <Button
-        android:id="@+id/edit_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Edit" />
 </LinearLayout>

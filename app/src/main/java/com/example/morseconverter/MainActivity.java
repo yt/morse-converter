@@ -12,7 +12,7 @@ import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.EditText;
 
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
@@ -24,7 +24,7 @@ import java.io.IOException;
 public class MainActivity extends AppCompatActivity {
 
     SurfaceView mCameraView;
-    TextView mTextView;
+    EditText mTextView;
     CameraSource mCameraSource;
 
     private static final String TAG = "MainActivity";
@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
         mCameraView = findViewById(R.id.surfaceView);
         mTextView = findViewById(R.id.text_view);
+        mTextView.setEnabled(false);
 
         startCameraSource();
     }
@@ -143,16 +144,16 @@ public class MainActivity extends AppCompatActivity {
         if (isCameraActive){
             mCameraSource.stop();
             isCameraActive = false;
+            mTextView.setEnabled(true);
             return;
         }
         try {
             mCameraSource.start(mCameraView.getHolder());
             isCameraActive = true;
+            mTextView.setEnabled(false);
         } catch (IOException e) {
             e.printStackTrace();
         }
         // TODO make edit button disabled or enabled according to isCameraActive
     }
-
-
 }
