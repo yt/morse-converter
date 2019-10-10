@@ -29,4 +29,10 @@
         android:layout_height="wrap_content"
         android:text="Camera"
         android:onClick="cameraSwitchButton"/>
+    <Button
+        android:id="@+id/flash_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Run Flash"
+        android:onClick="flashButton"/>
 </LinearLayout>

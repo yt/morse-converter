@@ -5,7 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.camera2.CameraAccessException;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
@@ -13,6 +15,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.EditText;
+import android.hardware.camera2.CameraManager;
 
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
@@ -43,8 +46,20 @@ public class MainActivity extends AppCompatActivity {
         startCameraSource();
     }
 
+    private void flashLightOn() {
+        // TODO change this method after writing morse algorithm
+        CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+        try {
+            String cameraId = cameraManager.getCameraIdList()[0];
+            cameraManager.setTorchMode(cameraId, true);
+        } catch (CameraAccessException e) {
+            Log.d(TAG, "Flash light access can not be established");
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
         if (requestCode != requestPermissionID) {
             Log.w(TAG, "Got unexpected permission result: " + requestCode);
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -54,6 +69,11 @@ public class MainActivity extends AppCompatActivity {
         if (grantResults[0] != PackageManager.PERMISSION_GRANTED ||
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                return; // TODO implement permission not set page or popup.
+        }
+
+        if (!getApplicationContext().getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
+            Log.w(TAG, "Flash is not available");
         }
 
         try {
@@ -154,6 +174,9 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // TODO make edit button disabled or enabled according to isCameraActive
+    }
+
+    public void flashButton(View view) {
+        flashLightOn();
     }
 }
