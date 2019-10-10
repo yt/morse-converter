@@ -43,103 +43,96 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode != requestPermissionID) {
-            Log.d(TAG, "Got unexpected permission result: " + requestCode);
+            Log.w(TAG, "Got unexpected permission result: " + requestCode);
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
             return;
         }
 
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            try {
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    return;
-                }
-                mCameraSource.start(mCameraView.getHolder());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if (grantResults[0] != PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+               return; // TODO implement permission not set page or popup.
+        }
+
+        try {
+            mCameraSource.start(mCameraView.getHolder());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     private void startCameraSource() {
 
-        //Create the TextRecognizer
         final TextRecognizer textRecognizer = new TextRecognizer.Builder(getApplicationContext()).build();
 
         if (!textRecognizer.isOperational()) {
             Log.w(TAG, "Detector dependencies not loaded yet");
-        } else {
-
-            //Initialize camerasource to use high resolution and set Autofocus on.
-            mCameraSource = new CameraSource.Builder(getApplicationContext(), textRecognizer)
-                    .setFacing(CameraSource.CAMERA_FACING_BACK)
-                    .setRequestedPreviewSize(1280, 1024)
-                    .setAutoFocusEnabled(true)
-                    .setRequestedFps(2.0f)
-                    .build();
-
-            /**
-             * Add call back to SurfaceView and check if camera permission is granted.
-             * If permission is granted we can start our cameraSource and pass it to surfaceView
-             */
-            mCameraView.getHolder().addCallback(new SurfaceHolder.Callback() {
-                @Override
-                public void surfaceCreated(SurfaceHolder holder) {
-                    try {
-
-                        if (ActivityCompat.checkSelfPermission(getApplicationContext(),
-                                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-
-                            ActivityCompat.requestPermissions(MainActivity.this,
-                                    new String[]{Manifest.permission.CAMERA},
-                                    requestPermissionID);
-                            return;
-                        }
-                        mCameraSource.start(mCameraView.getHolder());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                @Override
-                public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                }
-
-                @Override
-                public void surfaceDestroyed(SurfaceHolder holder) {
-                    mCameraSource.stop();
-                }
-            });
-
-            //Set the TextRecognizer's Processor.
-            textRecognizer.setProcessor(new Detector.Processor<TextBlock>() {
-                @Override
-                public void release() {
-                }
-
-                /**
-                 * Detect all the text from camera using TextBlock and the values into a stringBuilder
-                 * which will then be set to the textView.
-                 * */
-                @Override
-                public void receiveDetections(Detector.Detections<TextBlock> detections) {
-                    final SparseArray<TextBlock> items = detections.getDetectedItems();
-                    if (items.size() != 0 ){
-
-                        mTextView.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                StringBuilder stringBuilder = new StringBuilder();
-                                for(int i=0;i<items.size();i++){
-                                    TextBlock item = items.valueAt(i);
-                                    stringBuilder.append(item.getValue());
-                                    stringBuilder.append("\n");
-                                }
-                                mTextView.setText(stringBuilder.toString());
-                            }
-                        });
-                    }
-                }
-            });
+            return;
         }
+
+        mCameraSource = new CameraSource.Builder(getApplicationContext(), textRecognizer)
+                .setFacing(CameraSource.CAMERA_FACING_BACK)
+                .setRequestedPreviewSize(1280, 1024)
+                .setAutoFocusEnabled(true)
+                .setRequestedFps(2.0f)
+                .build();
+
+
+        mCameraView.getHolder().addCallback(new SurfaceHolder.Callback() {
+            @Override
+            public void surfaceCreated(SurfaceHolder holder) {
+                try {
+
+                    if (ActivityCompat.checkSelfPermission(getApplicationContext(),
+                            Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+
+                        ActivityCompat.requestPermissions(MainActivity.this,
+                                new String[]{Manifest.permission.CAMERA},
+                                requestPermissionID);
+                        return;
+                    }
+                    mCameraSource.start(mCameraView.getHolder());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+            }
+
+            @Override
+            public void surfaceDestroyed(SurfaceHolder holder) {
+                mCameraSource.stop();
+            }
+        });
+
+        textRecognizer.setProcessor(new Detector.Processor<TextBlock>() {
+            @Override
+            public void release() {
+            }
+
+            @Override
+            public void receiveDetections(Detector.Detections<TextBlock> detections) {
+                final SparseArray<TextBlock> words = detections.getDetectedItems();
+                final int wordCount = words.size();
+                if (wordCount == 0 )
+                    return;
+
+                mTextView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        StringBuilder stringBuilder = new StringBuilder();
+
+                        for(int i=0; i<wordCount; i++){
+                            TextBlock item = words.valueAt(i);
+                            stringBuilder.append(item.getValue());
+                            stringBuilder.append("\n");
+                        }
+                        mTextView.setText(stringBuilder.toString());
+                    }
+                });
+            }
+        });
+
     }
 }
