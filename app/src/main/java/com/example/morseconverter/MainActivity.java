@@ -11,6 +11,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.gms.vision.CameraSource;
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private static final int requestPermissionID = 101;
+    private boolean isCameraActive = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
                     mCameraSource.start(mCameraView.getHolder());
+                    isCameraActive = true;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -135,4 +138,21 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
+    public void cameraSwitchButton(View view) {
+        if (isCameraActive){
+            mCameraSource.stop();
+            isCameraActive = false;
+            return;
+        }
+        try {
+            mCameraSource.start(mCameraView.getHolder());
+            isCameraActive = true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // TODO make edit button disabled or enabled according to isCameraActive
+    }
+
+
 }
