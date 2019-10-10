@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:weightSum="5"
-    tools:context="com.tuts.prakash.simpleocr.MainActivity">
+    tools:context="com.example.morseconverter.MainActivity">
     <SurfaceView
         android:id="@+id/surfaceView"
         android:layout_width="match_parent"
@@ -22,4 +22,15 @@
         android:text="@string/txt_message"
         android:textColor="@android:color/black"
         android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/camera_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Camera" />
+    <Button
+        android:id="@+id/edit_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Edit" />
 </LinearLayout>
