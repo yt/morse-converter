@@ -46,12 +46,14 @@ public class MainActivity extends AppCompatActivity {
         startCameraSource();
     }
 
-    private void flashLightOn() {
+    private void flashLightSwitch(boolean onOff)
+    {
         // TODO change this method after writing morse algorithm
         CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         try {
             String cameraId = cameraManager.getCameraIdList()[0];
-            cameraManager.setTorchMode(cameraId, true);
+            cameraManager.setTorchMode(cameraId, onOff);
+
         } catch (CameraAccessException e) {
             Log.d(TAG, "Flash light access can not be established");
         }
@@ -177,6 +179,72 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void flashButton(View view) {
-        flashLightOn();
+        String morseString = stringToMorse(mTextView.getText().toString());
+        int totalLengthOfMorse = countMorseUnitAmount(morseString);
+        // TODO execute morse here executeMorse(morseString, totalLengthOfMorse);
+    }
+
+    private String stringToMorse(String text) {
+
+        // TODO map these letters
+        char[] letters = { ' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' };
+        String[] morseLetters = { " ", "._", "_...", "_._.", "_..", ".", ".._.", "__.", "....", "..", ".___", "_._", "._..",  "__", "_.", "___", ".__.", "__._", "._.", "...", "_", ".._", "..._", ".__", "_.._", "_.__", "__..", ".____", "..___", "...__", "...._", ".... .", "_....", "__...", "___..", "____.", "____ _"};
+        String lowerCaseText = text.toLowerCase();
+        String morseText = "";
+        for (int i = 0; i < lowerCaseText.length(); i++) {
+            for (short j = 0; j < 37; j++) {
+                if (lowerCaseText.charAt(i) == letters[j]) {
+                    morseText += morseLetters[j];
+                    morseText += " ";
+                    break;
+                }
+            }
+        }
+        flashLightSwitch(true);
+    }
+
+    private int countMorseUnitAmount(String text) {
+        final short dot = 1;
+        final short dash = 3;
+        final short betweenDotDash = 1;
+        final short betweenCharacters = 3;
+        final short betweenWords = 7;
+        int unitAmount = 0;
+
+        int i;
+        for (i = 0; i < text.length()-1; i++) { // TODO clean this
+            char c = text.charAt(i);
+            if (c == '.') {
+                unitAmount += dot;
+                if (text.charAt(i+1) == '_'){
+                    unitAmount += betweenDotDash;
+                } else if (text.charAt(i+1) == '.'){
+                    unitAmount += betweenCharacters;
+                } else if (text.charAt(i+1) == ' '){
+                    unitAmount += betweenCharacters;
+                }
+            } else if (c == '_') {
+                unitAmount += dash;
+                if (text.charAt(i+1) == '.'){
+                    unitAmount += betweenDotDash;
+                } else if (text.charAt(i+1) == '_'){
+                    unitAmount += betweenCharacters;
+                } else if (text.charAt(i+1) == ' '){
+                    unitAmount += betweenCharacters;
+                }
+            } else if (c == ' ') {
+                if (text.charAt(i+1) == ' '){
+                    unitAmount += betweenWords;
+                }
+            }
+            Log.d(TAG, c + " " + unitAmount + "word added");
+        }
+        if (text.charAt(i) == '.') {
+            unitAmount += dot;
+        } else if (text.charAt(i) == '_') {
+            unitAmount += dash;
+        }
+
+        return unitAmount;
     }
 }
