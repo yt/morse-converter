@@ -46,16 +46,17 @@ public class MainActivity extends AppCompatActivity {
         startCameraSource();
     }
 
-    private void flashLightSwitch(boolean onOff)
-    {
-        // TODO change this method after writing morse algorithm
+    private void flashLightSwitch(boolean onOff, int milliseconds) {
         CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         try {
             String cameraId = cameraManager.getCameraIdList()[0];
             cameraManager.setTorchMode(cameraId, onOff);
-
+            Thread.sleep(milliseconds);
         } catch (CameraAccessException e) {
-            Log.d(TAG, "Flash light access can not be established");
+            Log.w(TAG, "Flash light access can not be established");
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -180,8 +181,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void flashButton(View view) {
         String morseString = stringToMorse(mTextView.getText().toString());
-        int totalLengthOfMorse = countMorseUnitAmount(morseString);
-        // TODO execute morse here executeMorse(morseString, totalLengthOfMorse);
+        executeMorseCode(morseString);
     }
 
     private String stringToMorse(String text) {
@@ -200,51 +200,46 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        flashLightSwitch(true);
+        return morseText;
     }
 
-    private int countMorseUnitAmount(String text) {
-        final short dot = 1;
-        final short dash = 3;
-        final short betweenDotDash = 1;
-        final short betweenCharacters = 3;
-        final short betweenWords = 7;
-        int unitAmount = 0;
+    private void executeMorseCode(String text) {
+        final int milliSecMultiplier = 100;
+        final int dot = milliSecMultiplier;
+        final int dash = 3 * milliSecMultiplier;
+        final int betweenDotDash = milliSecMultiplier;
+        final int betweenCharacters = 3 * milliSecMultiplier;
+        final int betweenWords = 7 * milliSecMultiplier;
+
 
         int i;
         for (i = 0; i < text.length()-1; i++) { // TODO clean this
             char c = text.charAt(i);
             if (c == '.') {
-                unitAmount += dot;
+                flashLightSwitch(true, dot);
                 if (text.charAt(i+1) == '_'){
-                    unitAmount += betweenDotDash;
+                    flashLightSwitch(false, betweenDotDash);
                 } else if (text.charAt(i+1) == '.'){
-                    unitAmount += betweenCharacters;
-                } else if (text.charAt(i+1) == ' '){
-                    unitAmount += betweenCharacters;
+                    flashLightSwitch(false, betweenCharacters);
                 }
             } else if (c == '_') {
-                unitAmount += dash;
+                flashLightSwitch(true, dash);
                 if (text.charAt(i+1) == '.'){
-                    unitAmount += betweenDotDash;
+                    flashLightSwitch(false, betweenDotDash);
                 } else if (text.charAt(i+1) == '_'){
-                    unitAmount += betweenCharacters;
-                } else if (text.charAt(i+1) == ' '){
-                    unitAmount += betweenCharacters;
+                    flashLightSwitch(false, betweenCharacters);
                 }
             } else if (c == ' ') {
                 if (text.charAt(i+1) == ' '){
-                    unitAmount += betweenWords;
+                    flashLightSwitch(false, betweenWords);
                 }
             }
-            Log.d(TAG, c + " " + unitAmount + "word added");
         }
         if (text.charAt(i) == '.') {
-            unitAmount += dot;
+            flashLightSwitch(true, dot);
         } else if (text.charAt(i) == '_') {
-            unitAmount += dash;
+            flashLightSwitch(true, dash);
         }
-
-        return unitAmount;
+        flashLightSwitch(false, 0);
     }
 }
