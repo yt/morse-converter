@@ -23,6 +23,8 @@ import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -185,20 +187,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String stringToMorse(String text) {
-
-        // TODO map these letters
         char[] letters = { ' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' };
         String[] morseLetters = { " ", "._", "_...", "_._.", "_..", ".", ".._.", "__.", "....", "..", ".___", "_._", "._..",  "__", "_.", "___", ".__.", "__._", "._.", "...", "_", ".._", "..._", ".__", "_.._", "_.__", "__..", ".____", "..___", "...__", "...._", ".... .", "_....", "__...", "___..", "____.", "____ _"};
         String lowerCaseText = text.toLowerCase();
         String morseText = "";
+
+        Map<Character, String> morseMap = new HashMap<>();
+        for (int l = 0; l < letters.length; l++){
+            morseMap.put(letters[l], morseLetters[l]);
+        }
+
         for (int i = 0; i < lowerCaseText.length(); i++) {
-            for (short j = 0; j < 37; j++) {
-                if (lowerCaseText.charAt(i) == letters[j]) {
-                    morseText += morseLetters[j];
-                    morseText += " ";
-                    break;
-                }
-            }
+            morseText += morseMap.get(lowerCaseText.charAt(i));
+            morseText += " ";
         }
         return morseText;
     }
@@ -213,6 +214,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         int i;
+
         for (i = 0; i < text.length()-1; i++) { // TODO clean this
             char c = text.charAt(i);
             if (c == '.') {
